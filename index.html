@@ -168,7 +168,8 @@
                     <span>Auto Run</span>
                     <div class="toggle active" id="auto-run"></div>
                 </div>
-                <div>
+                <div><button onclick="openPreview()">Open in New Tab</button>
+
                     <button class="button" id="run">Run</button>
                     <button class="button" id="save">Save</button>
                     <button class="button" id="load">Load</button>
@@ -258,6 +259,15 @@
         cssEditor.setValue('body {\n    font-family: Arial, sans-serif;\n    text-align: center;\n    padding: 20px;\n}');
         jsEditor.setValue('console.log("Welcome to CodeZap!");');
         updatePreview();
+        function openPreview() {
+  const html = encodeURIComponent(editorHTML.getValue());
+  const css = encodeURIComponent(editorCSS.getValue());
+  const js = encodeURIComponent(editorJS.getValue());
+
+  const url = `preview.html?html=${html}&css=${css}&js=${js}`;
+  window.open(url, '_blank');
+}
+
     </script>
 </body>
 </html>
