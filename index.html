@@ -260,13 +260,14 @@
         jsEditor.setValue('console.log("Welcome to CodeZap!");');
         updatePreview();
         function openPreview() {
-  const html = encodeURIComponent(editorHTML.getValue());
-  const css = encodeURIComponent(editorCSS.getValue());
-  const js = encodeURIComponent(editorJS.getValue());
+  const html = encodeURIComponent(htmlEditor.getValue());
+  const css = encodeURIComponent(cssEditor.getValue());
+  const js = encodeURIComponent(jsEditor.getValue());
 
   const url = `preview.html?html=${html}&css=${css}&js=${js}`;
   window.open(url, '_blank');
 }
+
 
     </script>
 </body>
