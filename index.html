@@ -259,14 +259,26 @@
         cssEditor.setValue('body {\n    font-family: Arial, sans-serif;\n    text-align: center;\n    padding: 20px;\n}');
         jsEditor.setValue('console.log("Welcome to CodeZap!");');
         updatePreview();
-        function openPreview() {
-  const html = encodeURIComponent(htmlEditor.getValue());
-  const css = encodeURIComponent(cssEditor.getValue());
-  const js = encodeURIComponent(jsEditor.getValue());
+       let previewWindow = null;
 
-  const url = `preview.html?html=${html}&css=${css}&js=${js}`;
-  window.open(url, '_blank');
+function openPreview() {
+  const html = htmlEditor.getValue();
+  const css = cssEditor.getValue();
+  const js = jsEditor.getValue();
+
+  // Open preview tab or focus if already opened
+  if (!previewWindow || previewWindow.closed) {
+    previewWindow = window.open('preview.html', '_blank');
+    // Wait for preview tab to load before sending data
+    previewWindow.onload = () => {
+      previewWindow.postMessage({ html, css, js }, '*');
+    };
+  } else {
+    previewWindow.focus();
+    previewWindow.postMessage({ html, css, js }, '*');
+  }
 }
+
 
 
     </script>
