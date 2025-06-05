@@ -1,0 +1,33 @@
+<!-- preview.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Live Preview</title>
+</head>
+<body>
+  <div id="output"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const html = params.get("html") || "";
+    const css = params.get("css") || "";
+    const js = params.get("js") || "";
+
+    const iframe = document.createElement("iframe");
+    iframe.style.width = "100%";
+    iframe.style.height = "100vh";
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(`
+      <html>
+        <head><style>${css}</style></head>
+        <body>${html}<script>${js}<\/script></body>
+      </html>
+    `);
+    doc.close();
+  </script>
+</body>
+</html>
