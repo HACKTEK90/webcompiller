@@ -76,7 +76,10 @@
     }
     load();
 
-   async function runCode() {
+  async function runCode() {
+  const outputEl = document.getElementById("output");
+  outputEl.textContent = "Loading...";
+  
   const code = document.getElementById("code").value;
   try {
     let output = await pyodide.runPythonAsync(`
@@ -87,11 +90,12 @@ sys.stderr = sys.stdout
 ${code}
 sys.stdout.getvalue()
     `);
-    document.getElementById("output").textContent = output;
+    outputEl.textContent = output;
   } catch (err) {
-    document.getElementById("output").textContent = err;
+    outputEl.textContent = err;
   }
 }
+
 
   </script>
 </body>
