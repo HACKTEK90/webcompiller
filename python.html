@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Python Compiler</title>
   <style>
   body {
@@ -59,11 +60,29 @@
     white-space: pre-wrap;
     word-break: break-word;
     font-size: 14px;
-  }
+  } .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 16px;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
 </style>
 
 </head>
-<body>
+<body><div class="container">
   <textarea id="code" rows="10" cols="60">print("Hello, Python!")</textarea><br>
   <button onclick="runCode()">Run</button>
   <pre id="output"></pre>
@@ -101,6 +120,6 @@ sys.stdout.getvalue()
   });
 
 
-  </script>
+  </script></div>
 </body>
 </html>
