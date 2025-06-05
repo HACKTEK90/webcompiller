@@ -1,0 +1,32 @@
+<!-- Save this as python.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Python Compiler</title>
+</head>
+<body>
+  <textarea id="code" rows="10" cols="60">print("Hello, Python!")</textarea><br>
+  <button onclick="runCode()">Run</button>
+  <pre id="output"></pre>
+
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+  <script>
+    let pyodide;
+    async function load() {
+      pyodide = await loadPyodide();
+    }
+    load();
+
+    async function runCode() {
+      const code = document.getElementById("code").value;
+      try {
+        const result = await pyodide.runPythonAsync(code);
+        document.getElementById("output").textContent = result ?? "Executed.";
+      } catch (err) {
+        document.getElementById("output").textContent = err;
+      }
+    }
+  </script>
+</body>
+</html>
