@@ -42,13 +42,14 @@
     <iframe id="previewFrame"></iframe>
   </div>
 
-  <script>
-    const params = new URLSearchParams(location.search);
-    const html = decodeURIComponent(params.get("html") || "");
-    const css = decodeURIComponent(params.get("css") || "");
-    const js = decodeURIComponent(params.get("js") || "");
+ <script>
+  window.addEventListener('message', (event) => {
+    // Optional: Check event.origin to allow only trusted sources
+    const { html, css, js } = event.data || {};
 
-    const doc = document.getElementById("previewFrame").contentDocument;
+    if (!html && !css && !js) return;
+
+    const doc = document.getElementById('previewFrame').contentDocument;
     doc.open();
     doc.write(`
       <html>
@@ -62,6 +63,8 @@
       </html>
     `);
     doc.close();
-  </script>
+  });
+</script>
+
 </body>
 </html>
