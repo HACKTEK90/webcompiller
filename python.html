@@ -317,87 +317,21 @@
         }
 
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
             .container {
-                gap: 15px;
+                padding: 10px;
             }
             .header h1 {
                 font-size: 2rem;
             }
-            .editor-section, .output-section, .examples-section {
-                border-radius: 12px;
-            }
-            .editor-content, .output-section, .examples-section {
-                padding: 16px;
-            }
             .controls {
                 flex-direction: column;
                 align-items: stretch;
-                gap: 12px;
             }
             .button-group {
                 justify-content: center;
-                gap: 8px;
-            }
-            .button {
-                padding: 10px 16px;
-                font-size: 12px;
-                min-height: 44px;
             }
             textarea {
-                height: 150px;
-                font-size: 12px;
-                padding: 12px;
-            }
-            .output-display {
-                font-size: 12px;
-                padding: 12px;
-                max-height: 250px;
-            }
-            .example-buttons {
-                gap: 6px;
-            }
-            .example-btn {
-                padding: 6px 12px;
-                font-size: 11px;
-                min-height: 36px;
-            }
-            .status-indicator {
-                font-size: 10px;
-                padding: 3px 6px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 8px;
-            }
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            .header p {
-                font-size: 1rem;
-            }
-            .editor-content, .output-section, .examples-section {
-                padding: 12px;
-            }
-            .button {
-                padding: 8px 12px;
-                font-size: 11px;
-            }
-            textarea {
-                height: 120px;
-                font-size: 11px;
-            }
-            .output-display {
-                font-size: 11px;
-                max-height: 200px;
-            }
-            .example-btn {
-                padding: 5px 8px;
-                font-size: 10px;
+                height: 200px;
             }
         }
     </style>
@@ -660,32 +594,12 @@ except Exception as e:
             }
         }
 
-        // Keyboard shortcuts and mobile improvements
-        const codeEditor = document.getElementById('code');
-        
-        codeEditor.addEventListener('keydown', function(e) {
+        // Keyboard shortcuts
+        document.getElementById('code').addEventListener('keydown', function(e) {
             if (e.ctrlKey && e.key === 'Enter') {
                 runCode();
             }
-            // Mobile: Add tab support
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                const start = this.selectionStart;
-                const end = this.selectionEnd;
-                this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
-                this.selectionStart = this.selectionEnd = start + 4;
-            }
         });
-
-        // Mobile: Prevent zoom on focus
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-            codeEditor.addEventListener('focus', function() {
-                this.style.fontSize = '16px';
-            });
-            codeEditor.addEventListener('blur', function() {
-                this.style.fontSize = '';
-            });
-        }
 
         // Initialize Python on page load
         window.addEventListener('load', initializePython);
