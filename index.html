@@ -27,6 +27,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23059669;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='40' fill='url(%23grad)'/%3E%3Cpath d='M40 50h100v12H40zm0 24h80v12H40zm0 24h90v12H40zm0 24h70v12H40z' fill='white' opacity='0.9'/%3E%3Cpath d='M120 90l20 15-20 15v-10h-15v-10h15v-10z' fill='%23fbbf24'/%3E%3C/svg%3E">
     <script src="https://cdn.jsdelivr.net/gh/hacktek90/cursor@main/cursor-plugin.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -693,35 +694,37 @@
             }
         });
 
-        // URL sharing functionality
+        // URL sharing functionality with compression
         function loadFromURL() {
             const params = new URLSearchParams(window.location.search);
-            const html = params.get('html');
-            const css = params.get('css');
-            const js = params.get('js');
+            const compressed = params.get('c');
             
-            if (html || css || js) {
-                htmlEditor.setValue(html ? decodeURIComponent(html) : '');
-                cssEditor.setValue(css ? decodeURIComponent(css) : '');
-                jsEditor.setValue(js ? decodeURIComponent(js) : '');
-                updatePreview();
-                updateMobilePreview();
+            if (compressed) {
+                try {
+                    const decompressed = LZString.decompressFromEncodedURIComponent(compressed);
+                    const data = JSON.parse(decompressed);
+                    htmlEditor.setValue(data.h || '');
+                    cssEditor.setValue(data.c || '');
+                    jsEditor.setValue(data.j || '');
+                    updatePreview();
+                    updateMobilePreview();
+                } catch (e) {
+                    console.error('Failed to load shared code:', e);
+                }
             }
         }
 
         function generateShareURL() {
-            const html = encodeURIComponent(htmlEditor.getValue());
-            const css = encodeURIComponent(cssEditor.getValue());
-            const js = encodeURIComponent(jsEditor.getValue());
+            const data = {
+                h: htmlEditor.getValue(),
+                c: cssEditor.getValue(),
+                j: jsEditor.getValue()
+            };
             
+            const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(data));
             const baseURL = window.location.origin + window.location.pathname;
-            const params = new URLSearchParams();
             
-            if (htmlEditor.getValue()) params.set('html', html);
-            if (cssEditor.getValue()) params.set('css', css);
-            if (jsEditor.getValue()) params.set('js', js);
-            
-            return `${baseURL}?${params.toString()}`;
+            return `${baseURL}?c=${compressed}`;
         }
 
         document.getElementById('share').addEventListener('click', () => {
