@@ -1201,8 +1201,7 @@
                             </div>
                         </div>
                     </div>
-                    <button class="button ghost" onclick="window.open('python.html', '_blank')">🐍 Python</button>
-                    <button class="button ghost" onclick="window.open('sql.html', '_blank')">🗃 SQL</button>
+
                 </div>
             </div>
             <iframe id="preview"></iframe>
@@ -1559,12 +1558,21 @@
         }
 
         document.getElementById('share').addEventListener('click', () => {
-            const shareURL = generateShareURL();
-            navigator.clipboard.writeText(shareURL).then(() => {
-                alert('Share link copied to clipboard!');
-            }).catch(() => {
-                prompt('Copy this link to share:', shareURL);
-            });
+            if (currentRoom) {
+                const roomLink = `${window.location.origin}${window.location.pathname}?room=${currentRoom}`;
+                navigator.clipboard.writeText(roomLink).then(() => {
+                    alert('Room link copied to clipboard!');
+                }).catch(() => {
+                    prompt('Copy this room link:', roomLink);
+                });
+            } else {
+                const shareURL = generateShareURL();
+                navigator.clipboard.writeText(shareURL).then(() => {
+                    alert('Share link copied to clipboard!');
+                }).catch(() => {
+                    prompt('Copy this link to share:', shareURL);
+                });
+            }
         });
         
         // Embed dropdown functionality
