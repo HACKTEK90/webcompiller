@@ -403,6 +403,106 @@
             display: block;
         }
 
+        /* Embed mode styles */
+        .embed-mode {
+            padding: 0;
+            background: white;
+        }
+        
+        .embed-mode .container {
+            max-width: none;
+            margin: 0;
+            gap: 0;
+            animation: none;
+        }
+        
+        .embed-mode .editor-section {
+            border-radius: 0;
+            box-shadow: none;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .embed-mode .preview-section {
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+        }
+        
+        .embed-mode .preview-section iframe {
+            border-radius: 0;
+            height: 300px;
+        }
+        
+        .embed-mode .controls {
+            display: none;
+        }
+        
+        .embed-mode .CodeMirror {
+            height: 200px;
+        }
+        
+        /* Preview-only embed mode */
+        .embed-preview-only .editor-section {
+            display: none;
+        }
+        
+        .embed-preview-only .preview-section {
+            padding: 0;
+        }
+        
+        .embed-preview-only .preview-section iframe {
+            height: 100vh;
+        }
+        
+        /* Embed dropdown menu */
+        .embed-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .embed-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .embed-menu.show {
+            display: block;
+        }
+        
+        .embed-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.2s;
+        }
+        
+        .embed-option:last-child {
+            border-bottom: none;
+        }
+        
+        .embed-option:hover {
+            background: #f8fafc;
+        }
+        
+        .embed-option-title {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+        
+        .embed-option-desc {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
         @media (max-width: 768px) {
             .tab {
                 flex: 1;
@@ -469,6 +569,19 @@
                     <button class="button outline" id="load">📁 Load</button>
                     <button class="button ghost" id="download">⬇ Export</button>
                     <button class="button ghost" id="share">🔗 Share</button>
+                    <div class="embed-dropdown">
+                        <button class="button ghost" id="embed">💼 Embed</button>
+                        <div class="embed-menu" id="embed-menu">
+                            <div class="embed-option" data-mode="preview">
+                                <div class="embed-option-title">👁️ Preview Only</div>
+                                <div class="embed-option-desc">Show only the live preview</div>
+                            </div>
+                            <div class="embed-option" data-mode="full">
+                                <div class="embed-option-title">⚙️ Full Compiler</div>
+                                <div class="embed-option-desc">Show code editors + preview</div>
+                            </div>
+                        </div>
+                    </div>
                     <button class="button ghost" onclick="window.open('python.html', '_blank')">🐍 Python</button>
                     <button class="button ghost" onclick="window.open('sql.html', '_blank')">🗃 SQL</button>
                 </div>
@@ -698,6 +811,16 @@
         function loadFromURL() {
             const params = new URLSearchParams(window.location.search);
             const compressed = params.get('c');
+            const embedMode = params.get('embed');
+            
+            if (embedMode) {
+                document.body.style.padding = '0';
+                if (embedMode === 'preview') {
+                    document.body.classList.add('embed-mode', 'embed-preview-only');
+                } else {
+                    document.body.classList.add('embed-mode');
+                }
+            }
             
             if (compressed) {
                 try {
@@ -726,6 +849,19 @@
             
             return `${baseURL}?c=${compressed}`;
         }
+        
+        function generateEmbedURL(mode = 'full') {
+            const data = {
+                h: htmlEditor.getValue(),
+                c: cssEditor.getValue(),
+                j: jsEditor.getValue()
+            };
+            
+            const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(data));
+            const baseURL = window.location.origin + window.location.pathname;
+            
+            return `${baseURL}?c=${compressed}&embed=${mode}`;
+        }
 
         document.getElementById('share').addEventListener('click', () => {
             const shareURL = generateShareURL();
@@ -733,6 +869,34 @@
                 alert('Share link copied to clipboard!');
             }).catch(() => {
                 prompt('Copy this link to share:', shareURL);
+            });
+        });
+        
+        // Embed dropdown functionality
+        document.getElementById('embed').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const menu = document.getElementById('embed-menu');
+            menu.classList.toggle('show');
+        });
+        
+        document.addEventListener('click', () => {
+            document.getElementById('embed-menu').classList.remove('show');
+        });
+        
+        document.querySelectorAll('.embed-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const mode = option.dataset.mode;
+                const embedURL = generateEmbedURL(mode);
+                const dimensions = mode === 'preview' ? 'width="600" height="400"' : 'width="800" height="500"';
+                const embedCode = `<iframe src="${embedURL}" ${dimensions} frameborder="0"></iframe>`;
+                
+                navigator.clipboard.writeText(embedCode).then(() => {
+                    alert(`${mode === 'preview' ? 'Preview-only' : 'Full compiler'} embed code copied!`);
+                }).catch(() => {
+                    prompt('Copy this embed code:', embedCode);
+                });
+                
+                document.getElementById('embed-menu').classList.remove('show');
             });
         });
 
