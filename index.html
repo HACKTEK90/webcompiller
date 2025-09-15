@@ -77,21 +77,25 @@
         .tab-container {
             display: flex;
             background: #f8fafc;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .tab {
             padding: 16px 24px;
             cursor: pointer;
-            font-weight: 500;
-            color: #6b7280;
-            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            color: #64748b;
             transition: all 0.2s ease;
             position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            border-bottom: 3px solid transparent;
         }
 
         .tab:hover {
-            color: #374151;
+            color: #334155;
             background: #f1f5f9;
         }
 
@@ -99,6 +103,10 @@
             color: #6366f1;
             background: white;
             border-bottom-color: #6366f1;
+        }
+
+        .tab-icon {
+            font-size: 16px;
         }
 
         .tab-content {
@@ -213,28 +221,97 @@
         }
 
         .button {
-            padding: 10px 20px;
-            background: #6366f1;
-            color: white;
-            border: none;
-            border-radius: 8px;
+            padding: 12px 24px;
+            border: 2px solid transparent;
+            border-radius: 12px;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 14px;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-transform: none;
+            letter-spacing: 0.5px;
+        }
+
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .button:hover::before {
+            left: 100%;
         }
 
         .button:hover {
-            background: #5855eb;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .button:active {
+            transform: translateY(0);
         }
 
         .button.primary {
-            background: #059669;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
 
         .button.primary:hover {
-            background: #047857;
+            background: linear-gradient(135deg, #059669, #047857);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .button.secondary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .button.secondary:hover {
+            background: linear-gradient(135deg, #5855eb, #7c3aed);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .button.outline {
+            background: transparent;
+            color: #6366f1;
+            border-color: #6366f1;
+        }
+
+        .button.outline:hover {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+
+        .button.ghost {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            border-color: transparent;
+        }
+
+        .button.ghost:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: #5855eb;
+        }
+
+        .button.danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .button.danger:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
         }
 
         #error {
@@ -280,21 +357,141 @@
             border-left: 4px solid #dc2626;
         }
 
+        .fullscreen-mode .editor-section {
+            display: none;
+        }
+
+        .fullscreen-mode .preview-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1000;
+            border-radius: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        .fullscreen-mode .preview-section iframe {
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+        }
+
+        .fullscreen-mode .controls {
+            display: none;
+        }
+
+        .fullscreen-exit {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+
+        .fullscreen-exit:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+        .fullscreen-mode .fullscreen-exit {
+            display: block;
+        }
+
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                gap: 15px;
+            }
             .tab {
                 flex: 1;
                 text-align: center;
                 padding: 10px 8px;
-                font-size: 13px;
+                font-size: 11px;
+                min-height: 48px;
+                justify-content: center;
+                gap: 4px;
+            }
+            .tab span:last-child {
+                display: none;
+            }
+            .tab-icon {
+                font-size: 18px;
             }
             .mobile-preview-tab {
-                display: block;
+                display: flex;
             }
             .preview-section {
                 display: none;
             }
             .CodeMirror {
+                height: 200px;
+                font-size: 12px;
+            }
+            .editor-section {
+                border-radius: 12px;
+            }
+            .button {
+                padding: 10px 16px;
+                font-size: 12px;
+                min-height: 44px;
+            }
+            .button-group {
+                gap: 8px;
+            }
+            .mobile-controls {
+                padding: 12px;
+                gap: 8px;
+            }
+            #mobile-preview {
                 height: 250px;
+            }
+            .toggle {
+                width: 44px;
+                height: 24px;
+            }
+            .toggle::before {
+                width: 20px;
+                height: 20px;
+            }
+            .toggle.active::before {
+                transform: translateX(20px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+            .tab {
+                padding: 8px 4px;
+                font-size: 10px;
+            }
+            .tab-icon {
+                font-size: 16px;
+            }
+            .button {
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+            .CodeMirror {
+                height: 180px;
+            }
+            #mobile-preview {
+                height: 200px;
             }
         }
     </style>
@@ -303,10 +500,22 @@
     <div class="container">
         <div class="editor-section">
             <div class="tab-container">
-                <div class="tab active" data-tab="html">📄 HTML</div>
-                <div class="tab" data-tab="css">🎨 CSS</div>
-                <div class="tab" data-tab="js">⚡ JavaScript</div>
-                <div class="tab mobile-preview-tab" data-tab="preview">👁️ Preview</div>
+                <div class="tab active" data-tab="html">
+                    <span class="tab-icon">📄</span>
+                    <span>HTML</span>
+                </div>
+                <div class="tab" data-tab="css">
+                    <span class="tab-icon">🎨</span>
+                    <span>CSS</span>
+                </div>
+                <div class="tab" data-tab="js">
+                    <span class="tab-icon">⚡</span>
+                    <span>JavaScript</span>
+                </div>
+                <div class="tab mobile-preview-tab" data-tab="preview">
+                    <span class="tab-icon">👁️</span>
+                    <span>Preview</span>
+                </div>
             </div>
             <div class="tab-content active" id="html-content">
                 <textarea id="html"></textarea>
@@ -325,8 +534,8 @@
                     </div>
                     <div class="button-group">
                         <button class="button primary" id="mobile-run">▶ Run</button>
-                        <button class="button" id="mobile-save">💾 Save</button>
-                        <button class="button" id="mobile-load">📁 Load</button>
+                        <button class="button outline" id="mobile-save">💾 Save</button>
+                        <button class="button outline" id="mobile-load">📁 Load</button>
                     </div>
                 </div>
                 <iframe id="mobile-preview"></iframe>
@@ -340,18 +549,19 @@
                     <div class="toggle active" id="auto-run"></div>
                 </div>
                 <div class="button-group">
-                    <button class="button primary" id="run">▶ Run</button>
-                    <button class="button" onclick="openPreview()">🚀 New Tab</button>
-                    <button class="button" id="save">💾 Save</button>
-                    <button class="button" id="load">📁 Load</button>
-                    <button class="button" id="download">⬇ Download</button>
-                    <button class="button" onclick="window.open('python.html', '_blank')">🐍 Python</button>
-                    <button class="button" onclick="window.open('sql.html', '_blank')">🗃 SQL</button>
+                    <button class="button primary" id="run">▶ Run Code</button>
+                    <button class="button secondary" id="fullscreen">🔍 Fullscreen</button>
+                    <button class="button outline" id="save">💾 Save</button>
+                    <button class="button outline" id="load">📁 Load</button>
+                    <button class="button ghost" id="download">⬇ Export</button>
+                    <button class="button ghost" onclick="window.open('python.html', '_blank')">🐍 Python</button>
+                    <button class="button ghost" onclick="window.open('sql.html', '_blank')">🗃 SQL</button>
                 </div>
             </div>
             <iframe id="preview"></iframe>
             <div id="error"></div>
         </div>
+        <button class="fullscreen-exit" id="fullscreen-exit">×</button>
     </div>
     <script>
         const baseConfig = {
@@ -541,25 +751,31 @@
         cssEditor.setValue('body {\n    font-family: Arial, sans-serif;\n    text-align: center;\n    padding: 20px;\n}');
         jsEditor.setValue('console.log("Welcome to CodeZap!");');
         updatePreview();
-       let previewWindow = null;
+        // Fullscreen functionality
+        let isFullscreen = false;
+        const fullscreenBtn = document.getElementById('fullscreen');
+        const fullscreenExitBtn = document.getElementById('fullscreen-exit');
 
-function openPreview() {
-  const html = htmlEditor.getValue();
-  const css = cssEditor.getValue();
-  const js = jsEditor.getValue();
+        function enterFullscreen() {
+            isFullscreen = true;
+            document.body.classList.add('fullscreen-mode');
+            updatePreview();
+        }
 
-  // Open preview tab or focus if already opened
-  if (!previewWindow || previewWindow.closed) {
-    previewWindow = window.open('preview.html', '_blank');
-    // Wait for preview tab to load before sending data
-    previewWindow.onload = () => {
-      previewWindow.postMessage({ html, css, js }, '*');
-    };
-  } else {
-    previewWindow.focus();
-    previewWindow.postMessage({ html, css, js }, '*');
-  }
-}
+        function exitFullscreen() {
+            isFullscreen = false;
+            document.body.classList.remove('fullscreen-mode');
+        }
+
+        fullscreenBtn.addEventListener('click', enterFullscreen);
+        fullscreenExitBtn.addEventListener('click', exitFullscreen);
+
+        // Exit fullscreen with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isFullscreen) {
+                exitFullscreen();
+            }
+        });
 
 
 

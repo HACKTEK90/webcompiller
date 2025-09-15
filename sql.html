@@ -1,157 +1,512 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SQL Compiler</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #8B5CF6, #EC4899);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 40px;
-      min-height: 100vh;
-    }
-
-    .container {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(12px);
-      padding: 30px;
-      border-radius: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      width: 90%;
-      max-width: 900px;
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    textarea {
-      width: 100%;
-      height: 120px;
-      padding: 12px;
-      font-size: 1rem;
-      border-radius: 12px;
-      border: none;
-      resize: vertical;
-      outline: none;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-    }
-
-    button {
-      margin-top: 10px;
-      background: rgba(255, 255, 255, 0.15);
-      border: none;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    button:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
-
-    pre {
-      margin-top: 20px;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 15px;
-      border-radius: 12px;
-      font-family: monospace;
-      overflow-x: auto;
-    }
-
-    table {
-      margin-top: 15px;
-      width: 100%;
-      border-collapse: collapse;
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    table th, table td {
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 8px 10px;
-      text-align: left;
-    }
-
-    table th {
-      background: rgba(255, 255, 255, 0.1);
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>SQL Compiler</h1>
-    <textarea id="sql-input">SELECT sqlite_version();</textarea>
-    <br />
-    <button onclick="runSQL()">Run</button>
-    <div id="sql-output"><pre>Loading...</pre></div>
-  </div>
-
-  <script>
-    let db;
-
-    initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` })
-      .then(SQL => {
-        db = new SQL.Database();
-        runSQL(); // autorun on load
-      });
-
-    function runSQL() {
-      const sql = document.getElementById("sql-input").value;
-      const output = document.getElementById("sql-output");
-      output.innerHTML = "<pre>Loading...</pre>";
-
-      try {
-        const results = db.exec(sql);
-
-        if (!results.length) {
-          output.innerHTML = "<pre>Query executed.</pre>";
-          return;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CodeZap SQL - Online SQL compiler and database editor">
+    <meta name="theme-color" content="#0ea5e9">
+    <title>CodeZap SQL - Database Compiler</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%230ea5e9;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%236366f1;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='url(%23grad)'/%3E%3Cpath d='M8 12h16v2H8zm0 4h12v2H8zm0 4h14v2H8z' fill='white' opacity='0.9'/%3E%3Cpath d='M22 10h2v12h-2z' fill='%23fbbf24'/%3E%3C/svg%3E" type="image/svg+xml">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
-        // Generate result table
-        const table = document.createElement("table");
-        const thead = document.createElement("thead");
-        const tbody = document.createElement("tbody");
+        body {
+            min-height: 100vh;
+            background: #f1f5f9;
+            padding: 20px;
+        }
 
-        const headerRow = document.createElement("tr");
-        results[0].columns.forEach(col => {
-          const th = document.createElement("th");
-          th.textContent = col;
-          headerRow.appendChild(th);
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(14, 165, 233, 0.05) 50px, rgba(14, 165, 233, 0.05) 51px),
+                repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(14, 165, 233, 0.05) 50px, rgba(14, 165, 233, 0.05) 51px);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .editor-section {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .editor-header {
+            background: #f8fafc;
+            padding: 16px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-title {
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .editor-content {
+            padding: 24px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.3s ease;
+            background: #fafafa;
+        }
+
+        textarea:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            padding: 12px 24px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-transform: none;
+            letter-spacing: 0.5px;
+        }
+
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .button:hover::before {
+            left: 100%;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .button.primary {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        .button.primary:hover {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+        }
+
+        .button.outline {
+            background: transparent;
+            color: #0ea5e9;
+            border-color: #0ea5e9;
+        }
+
+        .button.outline:hover {
+            background: #0ea5e9;
+            color: white;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .results-content {
+            min-height: 100px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        table th {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        table tr:hover {
+            background: #f1f5f9;
+        }
+
+        .output-message {
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+        }
+
+        .output-success {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .output-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .output-loading {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                gap: 15px;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .editor-section, .results-section {
+                border-radius: 12px;
+            }
+            .editor-content, .results-section {
+                padding: 16px;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            .button-group {
+                justify-content: center;
+                gap: 8px;
+            }
+            .button {
+                padding: 10px 16px;
+                font-size: 12px;
+                min-height: 44px;
+            }
+            textarea {
+                height: 120px;
+                font-size: 12px;
+                padding: 12px;
+            }
+            table {
+                font-size: 12px;
+            }
+            table th, table td {
+                padding: 8px 6px;
+            }
+            .output-message {
+                padding: 12px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .header p {
+                font-size: 1rem;
+            }
+            .editor-content, .results-section {
+                padding: 12px;
+            }
+            .button {
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+            textarea {
+                height: 100px;
+                font-size: 11px;
+            }
+            table {
+                font-size: 11px;
+            }
+            table th, table td {
+                padding: 6px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗃️ CodeZap SQL</h1>
+            <p>Online SQL Database Compiler & Editor</p>
+        </div>
+
+        <div class="editor-section">
+            <div class="editor-header">
+                <div class="editor-title">
+                    📝 SQL Query Editor
+                </div>
+            </div>
+            <div class="editor-content">
+                <textarea id="sql-input" placeholder="-- Enter your SQL query here
+SELECT sqlite_version() AS version;
+
+-- Example: Create and query a table
+-- CREATE TABLE users (id INTEGER, name TEXT, email TEXT);
+-- INSERT INTO users VALUES (1, 'John Doe', 'john@example.com');
+-- SELECT * FROM users;">SELECT sqlite_version() AS version;</textarea>
+                <div class="controls">
+                    <div class="button-group">
+                        <button class="button primary" onclick="runSQL()">▶ Execute Query</button>
+                        <button class="button outline" onclick="clearEditor()">🗑️ Clear</button>
+                        <button class="button outline" onclick="loadSample()">📋 Sample</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div class="results-header">
+                📊 Query Results
+            </div>
+            <div class="results-content" id="sql-output">
+                <div class="output-message output-loading">Initializing SQL engine...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let db;
+
+        initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` })
+            .then(SQL => {
+                db = new SQL.Database();
+                document.getElementById('sql-output').innerHTML = '<div class="output-message output-success">SQL engine ready! Execute your first query.</div>';
+            })
+            .catch(err => {
+                document.getElementById('sql-output').innerHTML = `<div class="output-message output-error">Failed to load SQL engine: ${err.message}</div>`;
+            });
+
+        function runSQL() {
+            const sql = document.getElementById("sql-input").value.trim();
+            const output = document.getElementById("sql-output");
+            
+            if (!sql) {
+                output.innerHTML = '<div class="output-message output-error">Please enter a SQL query.</div>';
+                return;
+            }
+
+            output.innerHTML = '<div class="output-message output-loading">Executing query...</div>';
+
+            try {
+                const results = db.exec(sql);
+
+                if (!results.length) {
+                    output.innerHTML = '<div class="output-message output-success">Query executed successfully. No results to display.</div>';
+                    return;
+                }
+
+                // Generate result table
+                const table = document.createElement("table");
+                const thead = document.createElement("thead");
+                const tbody = document.createElement("tbody");
+
+                const headerRow = document.createElement("tr");
+                results[0].columns.forEach(col => {
+                    const th = document.createElement("th");
+                    th.textContent = col;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+
+                results[0].values.forEach(row => {
+                    const tr = document.createElement("tr");
+                    row.forEach(val => {
+                        const td = document.createElement("td");
+                        td.textContent = val !== null ? val : 'NULL';
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+
+                table.appendChild(thead);
+                table.appendChild(tbody);
+                output.innerHTML = "";
+                output.appendChild(table);
+
+            } catch (err) {
+                output.innerHTML = `<div class="output-message output-error">Error: ${err.message}</div>`;
+            }
+        }
+
+        function clearEditor() {
+            document.getElementById("sql-input").value = "";
+            document.getElementById("sql-output").innerHTML = '<div class="output-message output-success">Editor cleared. Ready for new query.</div>';
+        }
+
+        function loadSample() {
+            const sampleSQL = `-- Sample database operations
+CREATE TABLE employees (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    department TEXT,
+    salary INTEGER
+);
+
+INSERT INTO employees (name, department, salary) VALUES 
+    ('Alice Johnson', 'Engineering', 75000),
+    ('Bob Smith', 'Marketing', 65000),
+    ('Carol Davis', 'Engineering', 80000),
+    ('David Wilson', 'Sales', 60000);
+
+SELECT * FROM employees WHERE department = 'Engineering' ORDER BY salary DESC;`;
+            
+            document.getElementById("sql-input").value = sampleSQL;
+            document.getElementById("sql-output").innerHTML = '<div class="output-message output-success">Sample query loaded. Click "Execute Query" to run it.</div>';
+        }
+
+        // Keyboard shortcuts and mobile improvements
+        const sqlEditor = document.getElementById("sql-input");
+        
+        sqlEditor.addEventListener("keydown", function(e) {
+            if (e.ctrlKey && e.key === "Enter") {
+                runSQL();
+            }
+            // Mobile: Add tab support
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 4;
+            }
         });
-        thead.appendChild(headerRow);
 
-        results[0].values.forEach(row => {
-          const tr = document.createElement("tr");
-          row.forEach(val => {
-            const td = document.createElement("td");
-            td.textContent = val;
-            tr.appendChild(td);
-          });
-          tbody.appendChild(tr);
+        // Mobile: Prevent zoom on focus
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            sqlEditor.addEventListener('focus', function() {
+                this.style.fontSize = '16px';
+            });
+            sqlEditor.addEventListener('blur', function() {
+                this.style.fontSize = '';
+            });
+        }
+
+        // Mobile: Add touch feedback for buttons
+        document.querySelectorAll('.button').forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.95)';
+            });
+            button.addEventListener('touchend', function() {
+                this.style.transform = '';
+            });
         });
-
-        table.appendChild(thead);
-        table.appendChild(tbody);
-        output.innerHTML = "";
-        output.appendChild(table);
-
-      } catch (err) {
-        output.innerHTML = `<pre>Error: ${err.message}</pre>`;
-      }
-    }
-  </script>
+    </script>
 </body>
 </html>
