@@ -320,38 +320,7 @@
             border-left: 4px solid #dc2626;
         }
 
-        .mobile-preview-tab {
-            display: none;
-        }
 
-        .mobile-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            background: white;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        #mobile-preview {
-            width: 100%;
-            height: 300px;
-            border: none;
-            border-radius: 12px;
-            background: white;
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        #mobile-error {
-            color: #dc2626;
-            font-size: 0.9rem;
-            margin-top: 16px;
-            padding: 12px;
-            background: #fef2f2;
-            border-radius: 8px;
-            border-left: 4px solid #dc2626;
-        }
 
         .fullscreen-mode .editor-section {
             display: none;
@@ -404,6 +373,12 @@
         .fullscreen-mode .fullscreen-exit {
             display: block;
         }
+        
+        .preview-embed-mode .fullscreen-exit {
+            display: none;
+        }
+        
+
 
         /* Embed mode styles */
         .embed-mode {
@@ -443,42 +418,7 @@
             height: 200px;
         }
         
-        /* Preview-only embed mode */
-        .embed-preview-only .editor-section {
-            height: 40px;
-            overflow: hidden;
-        }
-        
-        .embed-preview-only .tab-content {
-            display: none;
-        }
-        
-        .embed-preview-only .preview-section {
-            flex: 1;
-            padding: 0;
-            border-radius: 0;
-            box-shadow: none;
-        }
-        
-        .embed-preview-only .preview-section iframe {
-            height: calc(100vh - 40px);
-            width: 100%;
-            border-radius: 0;
-        }
-        
-        .embed-preview-only .controls {
-            display: none;
-        }
-        
-        .embed-preview-only .container {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .embed-preview-only #error {
-            display: none;
-        }
+
         
         /* Embed dropdown menu */
         .embed-dropdown {
@@ -1127,12 +1067,6 @@
                 padding: 10px 8px;
                 font-size: 13px;
             }
-            .mobile-preview-tab {
-                display: block;
-            }
-            .preview-section {
-                display: none;
-            }
             .CodeMirror {
                 height: 250px;
             }
@@ -1146,7 +1080,7 @@
                 <div class="tab active" data-tab="html">📄 HTML</div>
                 <div class="tab" data-tab="css">🎨 CSS</div>
                 <div class="tab" data-tab="js">⚡ JavaScript</div>
-                <div class="tab mobile-preview-tab" data-tab="preview">👁️ Preview</div>
+
             </div>
             <div class="tab-content active" id="html-content">
                 <textarea id="html"></textarea>
@@ -1157,21 +1091,7 @@
             <div class="tab-content" id="js-content">
                 <textarea id="js"></textarea>
             </div>
-            <div class="tab-content" id="preview-content">
-                <div class="mobile-controls">
-                    <div class="toggle-container">
-                        <span>Auto Run</span>
-                        <div class="toggle active" id="mobile-auto-run"></div>
-                    </div>
-                    <div class="button-group">
-                        <button class="button primary" id="mobile-run">▶ Run</button>
-                        <button class="button outline" id="mobile-save">💾 Save</button>
-                        <button class="button outline" id="mobile-load">📁 Load</button>
-                    </div>
-                </div>
-                <iframe id="mobile-preview"></iframe>
-                <div id="mobile-error"></div>
-            </div>
+
         </div>
         <div class="preview-section">
             <div class="controls">
@@ -1188,16 +1108,17 @@
                     <button class="button ghost" id="share">🔗 Share</button>
                     <button class="button ghost" id="collaborate">🤝 Collaborate</button>
                     <button class="button ghost" id="view-logs" style="display: none;">📈 View All Logs</button>
+
                     <div class="embed-dropdown">
                         <button class="button ghost" id="embed">💼 Embed</button>
                         <div class="embed-menu" id="embed-menu">
-                            <div class="embed-option" data-mode="preview">
-                                <div class="embed-option-title">👁️ Preview Only</div>
-                                <div class="embed-option-desc">Show only the live preview</div>
-                            </div>
                             <div class="embed-option" data-mode="full">
                                 <div class="embed-option-title">⚙️ Full Compiler</div>
                                 <div class="embed-option-desc">Show code editors + preview</div>
+                            </div>
+                            <div class="embed-option" data-mode="preview">
+                                <div class="embed-option-title">👁️ Preview Only</div>
+                                <div class="embed-option-desc">Auto fullscreen preview with close button</div>
                             </div>
                         </div>
                     </div>
@@ -1385,57 +1306,7 @@
 
         // Original change handlers removed - now handled by Firebase sync
 
-        // Mobile preview functionality
-        const mobilePreview = document.getElementById('mobile-preview');
-        const mobileError = document.getElementById('mobile-error');
-        const mobileAutoRunToggle = document.getElementById('mobile-auto-run');
 
-        function updateMobilePreview() {
-            const html = htmlEditor.getValue();
-            const css = `<style>${cssEditor.getValue()}</style>`;
-            const js = `<script>${jsEditor.getValue()}<\/script>`;
-            const content = `${html}${css}${js}`;
-            
-            mobileError.textContent = '';
-            try {
-                const blob = new Blob([content], { type: 'text/html' });
-                mobilePreview.src = URL.createObjectURL(blob);
-            } catch (e) {
-                mobileError.textContent = `Error: ${e.message}`;
-            }
-        }
-
-        mobileAutoRunToggle.addEventListener('click', () => {
-            autoRun = !autoRun;
-            mobileAutoRunToggle.classList.toggle('active', autoRun);
-            autoRunToggle.classList.toggle('active', autoRun);
-            if (autoRun) {
-                updatePreview();
-                updateMobilePreview();
-            }
-        });
-
-        document.getElementById('mobile-run').addEventListener('click', () => {
-            updatePreview();
-            updateMobilePreview();
-        });
-
-        document.getElementById('mobile-save').addEventListener('click', () => {
-            localStorage.setItem('codezap_html', htmlEditor.getValue());
-            localStorage.setItem('codezap_css', cssEditor.getValue());
-            localStorage.setItem('codezap_js', jsEditor.getValue());
-            alert('Code saved!');
-        });
-
-        document.getElementById('mobile-load').addEventListener('click', () => {
-            htmlEditor.setValue(localStorage.getItem('codezap_html') || '');
-            cssEditor.setValue(localStorage.getItem('codezap_css') || '');
-            jsEditor.setValue(localStorage.getItem('codezap_js') || '');
-            if (autoRun) {
-                updatePreview();
-                updateMobilePreview();
-            }
-        });
 
         // Tab functionality
         const tabs = document.querySelectorAll('.tab');
@@ -1456,7 +1327,7 @@
                     if (targetTab === 'html') htmlEditor.refresh();
                     else if (targetTab === 'css') cssEditor.refresh();
                     else if (targetTab === 'js') jsEditor.refresh();
-                    else if (targetTab === 'preview') updateMobilePreview();
+
                 }, 10);
             });
         });
@@ -1503,10 +1374,8 @@
             if (embedMode) {
                 document.body.style.padding = '0';
                 if (embedMode === 'preview') {
-                    document.body.classList.add('embed-mode', 'embed-preview-only');
-                    // Hide background pattern for preview-only mode
-                    const bgElement = document.querySelector('body::before');
-                    if (bgElement) bgElement.style.display = 'none';
+                    document.body.classList.add('preview-embed-mode');
+                    enterFullscreen();
                 } else {
                     document.body.classList.add('embed-mode');
                 }
@@ -1523,7 +1392,6 @@
                     // Force update preview for embed modes
                     setTimeout(() => {
                         updatePreview();
-                        updateMobilePreview();
                     }, 100);
                 } catch (e) {
                     console.error('Failed to load shared code:', e);
@@ -1590,11 +1458,11 @@
             option.addEventListener('click', () => {
                 const mode = option.dataset.mode;
                 const embedURL = generateEmbedURL(mode);
-                const dimensions = mode === 'preview' ? 'width="600" height="400"' : 'width="800" height="500"';
+                const dimensions = mode === 'preview' ? 'width="100%" height="100%"' : 'width="800" height="500"';
                 const embedCode = `<iframe src="${embedURL}" ${dimensions} frameborder="0"></iframe>`;
                 
                 navigator.clipboard.writeText(embedCode).then(() => {
-                    alert(`${mode === 'preview' ? 'Preview-only' : 'Full compiler'} embed code copied!`);
+                    alert(`${mode === 'preview' ? 'Preview embed' : 'Full compiler embed'} code copied!`);
                 }).catch(() => {
                     prompt('Copy this embed code:', embedCode);
                 });
@@ -1604,7 +1472,11 @@
         });
 
         // Load code from URL on page load
-        window.addEventListener('load', loadFromURL);
+        window.addEventListener('load', () => {
+            loadFromURL();
+            
+
+        });
 
         // Enhanced Firebase Collaboration System
         const firebaseConfig = {
@@ -2104,7 +1976,6 @@
             typingTimeout = setTimeout(() => setTypingStatus(false), 1000);
             if (autoRun && !isUpdatingFromFirebase) {
                 updatePreview();
-                updateMobilePreview();
             }
         });
         
@@ -2115,7 +1986,6 @@
             typingTimeout = setTimeout(() => setTypingStatus(false), 1000);
             if (autoRun && !isUpdatingFromFirebase) {
                 updatePreview();
-                updateMobilePreview();
             }
         });
         
@@ -2126,7 +1996,6 @@
             typingTimeout = setTimeout(() => setTypingStatus(false), 1000);
             if (autoRun && !isUpdatingFromFirebase) {
                 updatePreview();
-                updateMobilePreview();
             }
         });
         
