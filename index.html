@@ -916,6 +916,24 @@
             display: none;
         }
         
+        .chat-alert {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 20px;
+            height: 20px;
+            background: #ef4444;
+            border: 2px solid white;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+        
         .chat-toggle:hover {
             transform: scale(1.1);
             box-shadow: 0 12px 35px rgba(99, 102, 241, 0.5);
@@ -1252,7 +1270,10 @@
     </div>
     
     <!-- Live Chat -->
-    <button class="chat-toggle" id="chat-toggle">💬</button>
+    <button class="chat-toggle" id="chat-toggle">
+        💬
+        <div class="chat-alert" id="chat-alert">!</div>
+    </button>
     <div class="chat-panel" id="chat-panel">
         <div class="chat-header">
             <span>💬 Live Chat</span>
@@ -1827,6 +1848,7 @@
             const leaveBtn = document.getElementById('leave-room');
             const viewLogsBtn = document.getElementById('view-logs');
             const chatToggle = document.getElementById('chat-toggle');
+            const collaborateBtn = document.getElementById('collaborate');
             
             if (currentRoom) {
                 roomInfo.style.display = 'block';
@@ -1835,6 +1857,7 @@
                 leaveBtn.style.display = 'inline-block';
                 viewLogsBtn.style.display = 'inline-block';
                 chatToggle.style.display = 'block';
+                collaborateBtn.textContent = '⚙️ Room Settings';
                 document.getElementById('room-status').textContent = `Connected to "${currentRoom}"`;
                 updateRoomFeatures();
             } else {
@@ -1844,6 +1867,7 @@
                 leaveBtn.style.display = 'none';
                 viewLogsBtn.style.display = 'none';
                 chatToggle.style.display = 'none';
+                collaborateBtn.textContent = '🤝 Collaborate';
                 document.getElementById('room-features').style.display = 'none';
             }
         }
@@ -2132,12 +2156,13 @@
         
         function toggleChat() {
             const panel = document.getElementById('chat-panel');
+            const chatAlert = document.getElementById('chat-alert');
             const isVisible = panel.style.display === 'flex';
             panel.style.display = isVisible ? 'none' : 'flex';
             
             if (!isVisible) {
                 document.getElementById('chat-input').focus();
-                document.getElementById('chat-toggle').classList.remove('has-messages');
+                chatAlert.style.display = 'none';
             }
         }
         
@@ -2191,9 +2216,11 @@
             
             chatMessages.scrollTop = chatMessages.scrollHeight;
             
-            // Show notification if chat is closed and there are new messages
-            if (validMessages.length > 0 && document.getElementById('chat-panel').style.display !== 'flex') {
-                document.getElementById('chat-toggle').classList.add('has-messages');
+            // Show alert for all users when there are new messages and chat is closed
+            const chatPanel = document.getElementById('chat-panel');
+            const chatAlert = document.getElementById('chat-alert');
+            if (validMessages.length > 0 && chatPanel.style.display !== 'flex') {
+                chatAlert.style.display = 'flex';
             }
         }
         
