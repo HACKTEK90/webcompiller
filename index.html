@@ -864,6 +864,243 @@
             font-weight: 500;
             margin-left: 8px;
         }
+        
+        /* Kick Notification */
+        .kick-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 24px 32px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(239, 68, 68, 0.4);
+            z-index: 3000;
+            text-align: center;
+            animation: kickAlert 0.5s ease;
+        }
+        
+        @keyframes kickAlert {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        
+        .kick-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .kick-message {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* Live Chat */
+        .chat-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s;
+            z-index: 1500;
+            display: none;
+        }
+        
+        .chat-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(99, 102, 241, 0.5);
+        }
+        
+        .chat-toggle.has-messages {
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        .chat-panel {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 320px;
+            height: 400px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 1500;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 16px;
+            border-radius: 16px 16px 0 0;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            max-height: 280px;
+        }
+        
+        .chat-message {
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            animation: messageIn 0.3s ease;
+        }
+        
+        @keyframes messageIn {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .chat-message.own {
+            background: #6366f1;
+            color: white;
+            margin-left: 40px;
+            text-align: right;
+        }
+        
+        .chat-message.other {
+            background: #f1f5f9;
+            color: #374151;
+            margin-right: 40px;
+        }
+        
+        .message-author {
+            font-weight: 600;
+            font-size: 11px;
+            margin-bottom: 2px;
+            opacity: 0.8;
+        }
+        
+        .message-time {
+            font-size: 10px;
+            opacity: 0.6;
+            margin-top: 2px;
+        }
+        
+        .chat-input-container {
+            padding: 16px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 20px;
+            font-size: 13px;
+            outline: none;
+        }
+        
+        .chat-input:focus {
+            border-color: #6366f1;
+        }
+        
+        .chat-send {
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Logs Viewer */
+        .logs-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logs-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+        
+        .logs-header {
+            background: linear-gradient(135deg, #374151, #4b5563);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logs-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .log-content {
+            flex: 1;
+        }
+        
+        .log-timestamp {
+            color: #6b7280;
+            font-size: 12px;
+            min-width: 100px;
+            text-align: right;
+        }
 
         @media (max-width: 768px) {
             .tab {
@@ -932,6 +1169,7 @@
                     <button class="button ghost" id="download">⬇ Export</button>
                     <button class="button ghost" id="share">🔗 Share</button>
                     <button class="button ghost" id="collaborate">🤝 Collaborate</button>
+                    <button class="button ghost" id="view-logs" style="display: none;">📈 View All Logs</button>
                     <div class="embed-dropdown">
                         <button class="button ghost" id="embed">💼 Embed</button>
                         <div class="embed-menu" id="embed-menu">
@@ -953,6 +1191,12 @@
             <div id="error"></div>
         </div>
         <button class="fullscreen-exit" id="fullscreen-exit">×</button>
+    </div>
+    
+    <!-- Kick Notification -->
+    <div class="kick-notification" id="kick-notification" style="display: none;">
+        <div class="kick-title">⚠️ You've been removed</div>
+        <div class="kick-message">You have been removed from the collaboration room</div>
     </div>
     
     <!-- Collaboration Dialog -->
@@ -1004,6 +1248,31 @@
                     <div class="collab-logs" id="activity-logs"></div>
                 </div>
             </div>
+        </div>
+    </div>
+    
+    <!-- Live Chat -->
+    <button class="chat-toggle" id="chat-toggle">💬</button>
+    <div class="chat-panel" id="chat-panel">
+        <div class="chat-header">
+            <span>💬 Live Chat</span>
+            <button style="background: none; border: none; color: white; cursor: pointer;" id="chat-close">×</button>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="chat-input" placeholder="Type a message..." maxlength="100">
+            <button class="chat-send" id="chat-send">➤</button>
+        </div>
+    </div>
+    
+    <!-- Logs Viewer -->
+    <div class="logs-viewer" id="logs-viewer">
+        <div class="logs-content">
+            <div class="logs-header">
+                <h3>📈 Complete Activity Logs</h3>
+                <button style="background: none; border: none; color: white; cursor: pointer; font-size: 20px;" id="logs-close">×</button>
+            </div>
+            <div class="logs-body" id="logs-body"></div>
         </div>
     </div>
     <script>
@@ -1376,6 +1645,20 @@
 
         document.getElementById('save-snapshot').addEventListener('click', saveSnapshot);
         document.getElementById('version-history').addEventListener('click', showVersionHistory);
+        document.getElementById('view-logs').addEventListener('click', showAllLogs);
+        document.getElementById('logs-close').addEventListener('click', () => {
+            document.getElementById('logs-viewer').style.display = 'none';
+        });
+        
+        // Chat functionality
+        document.getElementById('chat-toggle').addEventListener('click', toggleChat);
+        document.getElementById('chat-close').addEventListener('click', () => {
+            document.getElementById('chat-panel').style.display = 'none';
+        });
+        document.getElementById('chat-send').addEventListener('click', sendChatMessage);
+        document.getElementById('chat-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
         
         function createRoom() {
             const userName = document.getElementById('user-name').value.trim();
@@ -1404,12 +1687,14 @@
         
         function leaveRoom() {
             if (roomRef && currentRoom) {
+                addActivityLog(`${currentUser.name} left the room`);
                 roomRef.child('users').child(currentUser.id).remove();
                 if (currentUser.isCreator) {
                     roomRef.remove();
                 }
                 roomRef = null;
                 currentRoom = null;
+                document.getElementById('chat-panel').style.display = 'none';
                 updateCollabDialog();
                 // Redirect to clean URL
                 window.history.pushState({}, '', window.location.pathname);
@@ -1477,6 +1762,21 @@
                 updateActivityLogs(snapshot.val() || {});
             });
             
+            // Chat messages
+            roomRef.child('chat').limitToLast(20).on('value', (snapshot) => {
+                updateChatMessages(snapshot.val() || {});
+            });
+            
+            // Kick notifications
+            roomRef.child('kicks').child(currentUser.id).on('value', (snapshot) => {
+                if (snapshot.val()) {
+                    showKickNotification();
+                    setTimeout(() => {
+                        window.location.href = window.location.pathname;
+                    }, 3000);
+                }
+            });
+            
             // Room settings
             roomRef.child('settings').on('value', (snapshot) => {
                 roomSettings = { ...roomSettings, ...(snapshot.val() || {}) };
@@ -1525,12 +1825,16 @@
             const usersSection = document.getElementById('users-section');
             const logsSection = document.getElementById('logs-section');
             const leaveBtn = document.getElementById('leave-room');
+            const viewLogsBtn = document.getElementById('view-logs');
+            const chatToggle = document.getElementById('chat-toggle');
             
             if (currentRoom) {
                 roomInfo.style.display = 'block';
                 usersSection.style.display = 'block';
                 logsSection.style.display = 'block';
                 leaveBtn.style.display = 'inline-block';
+                viewLogsBtn.style.display = 'inline-block';
+                chatToggle.style.display = 'block';
                 document.getElementById('room-status').textContent = `Connected to "${currentRoom}"`;
                 updateRoomFeatures();
             } else {
@@ -1538,6 +1842,8 @@
                 usersSection.style.display = 'none';
                 logsSection.style.display = 'none';
                 leaveBtn.style.display = 'none';
+                viewLogsBtn.style.display = 'none';
+                chatToggle.style.display = 'none';
                 document.getElementById('room-features').style.display = 'none';
             }
         }
@@ -1639,9 +1945,19 @@
         }
         
         function kickUser(userId, userName) {
-            if (confirm(`Kick ${userName} from the room?`)) {
-                roomRef.child('users').child(userId).remove();
-                addActivityLog(`${userName} was kicked from the room`);
+            if (confirm(`Remove ${userName} from the room?`)) {
+                // Send kick notification to user
+                roomRef.child('kicks').child(userId).set({
+                    message: 'You have been removed from the room',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+                
+                setTimeout(() => {
+                    roomRef.child('users').child(userId).remove();
+                    roomRef.child('kicks').child(userId).remove();
+                }, 1000);
+                
+                addActivityLog(`${userName} was removed from the room`);
             }
         }
         
@@ -1804,6 +2120,104 @@
                 }
             }
         });
+        
+        // New feature functions
+        function showKickNotification() {
+            const notification = document.getElementById('kick-notification');
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        function toggleChat() {
+            const panel = document.getElementById('chat-panel');
+            const isVisible = panel.style.display === 'flex';
+            panel.style.display = isVisible ? 'none' : 'flex';
+            
+            if (!isVisible) {
+                document.getElementById('chat-input').focus();
+                document.getElementById('chat-toggle').classList.remove('has-messages');
+            }
+        }
+        
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message || !roomRef) return;
+            
+            const chatMessage = {
+                text: message,
+                author: currentUser.name,
+                authorId: currentUser.id,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                expiresAt: Date.now() + 10000 // 10 seconds
+            };
+            
+            roomRef.child('chat').push(chatMessage);
+            input.value = '';
+        }
+        
+        function updateChatMessages(messages) {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = '';
+            
+            const now = Date.now();
+            const validMessages = Object.entries(messages).filter(([id, msg]) => 
+                !msg.expiresAt || msg.expiresAt > now
+            );
+            
+            // Clean up expired messages
+            Object.entries(messages).forEach(([id, msg]) => {
+                if (msg.expiresAt && msg.expiresAt <= now) {
+                    roomRef.child('chat').child(id).remove();
+                }
+            });
+            
+            validMessages.forEach(([id, message]) => {
+                const messageDiv = document.createElement('div');
+                const isOwn = message.authorId === currentUser.id;
+                messageDiv.className = `chat-message ${isOwn ? 'own' : 'other'}`;
+                
+                messageDiv.innerHTML = `
+                    ${!isOwn ? `<div class="message-author">${message.author}</div>` : ''}
+                    <div>${message.text}</div>
+                    <div class="message-time">${new Date(message.timestamp).toLocaleTimeString()}</div>
+                `;
+                
+                chatMessages.appendChild(messageDiv);
+            });
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Show notification if chat is closed and there are new messages
+            if (validMessages.length > 0 && document.getElementById('chat-panel').style.display !== 'flex') {
+                document.getElementById('chat-toggle').classList.add('has-messages');
+            }
+        }
+        
+        function showAllLogs() {
+            if (!roomRef) return;
+            
+            roomRef.child('logs').once('value', (snapshot) => {
+                const logs = snapshot.val() || {};
+                const logsBody = document.getElementById('logs-body');
+                logsBody.innerHTML = '';
+                
+                Object.entries(logs).reverse().forEach(([id, log]) => {
+                    const logEntry = document.createElement('div');
+                    logEntry.className = 'log-entry';
+                    logEntry.innerHTML = `
+                        <div class="log-content">${log.message}</div>
+                        <div class="log-timestamp">${new Date(log.timestamp).toLocaleString()}</div>
+                    `;
+                    logsBody.appendChild(logEntry);
+                });
+                
+                document.getElementById('logs-viewer').style.display = 'flex';
+            });
+        }
         
         // Make functions global for onclick handlers
         window.kickUser = kickUser;
