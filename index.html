@@ -28,6 +28,8 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23059669;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='40' fill='url(%23grad)'/%3E%3Cpath d='M40 50h100v12H40zm0 24h80v12H40zm0 24h90v12H40zm0 24h70v12H40z' fill='white' opacity='0.9'/%3E%3Cpath d='M120 90l20 15-20 15v-10h-15v-10h15v-10z' fill='%23fbbf24'/%3E%3C/svg%3E">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -526,6 +528,219 @@
             font-size: 12px;
             color: #6b7280;
         }
+        
+        /* Collaboration Dialog */
+        .collab-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: none;
+        }
+        
+        .collab-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .collab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .collab-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .collab-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        
+        .collab-section {
+            margin-bottom: 20px;
+        }
+        
+        .collab-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .collab-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .collab-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+        
+        .collab-users {
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .user-name {
+            font-weight: 500;
+        }
+        
+        .user-role {
+            font-size: 12px;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        
+        .collab-logs {
+            max-height: 150px;
+            overflow-y: auto;
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        
+        .log-item {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        
+        .log-user {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .log-time {
+            color: #9ca3af;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .user-action-btn {
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .kick-btn {
+            color: #dc2626;
+        }
+        
+        .kick-btn:hover {
+            background: #fef2f2;
+        }
+        
+        .promote-btn {
+            color: #059669;
+        }
+        
+        .promote-btn:hover {
+            background: #f0fdf4;
+        }
+        
+        .user-status {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: 8px;
+        }
+        
+        .status-online {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-typing {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .collab-features {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .feature-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .feature-btn:hover {
+            background: #f9fafb;
+        }
+        
+        .feature-btn.active {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+        
+        .name-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
 
         @media (max-width: 768px) {
             .tab {
@@ -593,6 +808,7 @@
                     <button class="button outline" id="load">📁 Load</button>
                     <button class="button ghost" id="download">⬇ Export</button>
                     <button class="button ghost" id="share">🔗 Share</button>
+                    <button class="button ghost" id="collaborate">🤝 Collaborate</button>
                     <div class="embed-dropdown">
                         <button class="button ghost" id="embed">💼 Embed</button>
                         <div class="embed-menu" id="embed-menu">
@@ -614,6 +830,58 @@
             <div id="error"></div>
         </div>
         <button class="fullscreen-exit" id="fullscreen-exit">×</button>
+    </div>
+    
+    <!-- Collaboration Dialog -->
+    <div class="collab-overlay" id="collab-overlay">
+        <div class="collab-dialog">
+            <div class="collab-header">
+                <div class="collab-title">🤝 Collaboration</div>
+                <button class="collab-close" id="collab-close">×</button>
+            </div>
+            
+            <div class="collab-section">
+                <div class="collab-label">Your Name</div>
+                <input type="text" class="name-input" id="user-name" placeholder="Enter your name..." value="Anonymous">
+            </div>
+            
+            <div class="collab-section">
+                <div class="collab-label">Room Settings</div>
+                <input type="text" class="collab-input" id="room-name" placeholder="Enter room name...">
+                <div style="margin-top: 8px;">
+                    <button class="button primary" id="create-room">Create Room</button>
+                    <button class="button outline" id="join-room">Join Room</button>
+                    <button class="button danger" id="leave-room" style="display: none;">Leave Room</button>
+                </div>
+                <div class="collab-features" id="room-features" style="display: none;">
+                    <button class="feature-btn" id="toggle-readonly">🔒 Read-only Mode</button>
+                    <button class="feature-btn" id="toggle-voice">🎤 Voice Chat</button>
+                    <button class="feature-btn" id="save-snapshot">📸 Save Snapshot</button>
+                    <button class="feature-btn" id="version-history">📚 History</button>
+                </div>
+            </div>
+            
+            <div class="collab-section" id="room-info" style="display: none;">
+                <div class="collab-label">Room Status</div>
+                <div class="collab-status">
+                    <div class="status-dot"></div>
+                    <span id="room-status">Connected to room</span>
+                </div>
+                <div style="margin-top: 8px;">
+                    <button class="button ghost" id="copy-room-link">Copy Room Link</button>
+                </div>
+            </div>
+            
+            <div class="collab-section" id="users-section" style="display: none;">
+                <div class="collab-label">Active Users (<span id="user-count">0</span>) <span id="typing-indicator" style="font-size: 12px; color: #6b7280;"></span></div>
+                <div class="collab-users" id="users-list"></div>
+            </div>
+            
+            <div class="collab-section" id="logs-section" style="display: none;">
+                <div class="collab-label">Recent Activity</div>
+                <div class="collab-logs" id="activity-logs"></div>
+            </div>
+        </div>
     </div>
     <script>
         const baseConfig = {
@@ -703,24 +971,7 @@
             URL.revokeObjectURL(url);
         });
 
-        htmlEditor.on('change', () => { 
-            if (autoRun) {
-                updatePreview();
-                updateMobilePreview();
-            }
-        });
-        cssEditor.on('change', () => { 
-            if (autoRun) {
-                updatePreview();
-                updateMobilePreview();
-            }
-        });
-        jsEditor.on('change', () => { 
-            if (autoRun) {
-                updatePreview();
-                updateMobilePreview();
-            }
-        });
+        // Original change handlers removed - now handled by Firebase sync
 
         // Mobile preview functionality
         const mobilePreview = document.getElementById('mobile-preview');
@@ -933,6 +1184,461 @@
 
         // Load code from URL on page load
         window.addEventListener('load', loadFromURL);
+
+        // Enhanced Firebase Collaboration System
+        const firebaseConfig = {
+            apiKey: "AIzaSyAp9kCBsDLnQEmR7wWHXwt3FB2T1zDtiqU",
+            authDomain: "h-90-8a7c5.firebaseapp.com",
+            databaseURL: "https://h-90-8a7c5-default-rtdb.firebaseio.com",
+            projectId: "h-90-8a7c5",
+            storageBucket: "h-90-8a7c5.firebasestorage.app",
+            messagingSenderId: "367196609301",
+            appId: "1:367196609301:web:156e24c1b4532c26af671c",
+            measurementId: "G-W5K7F4VQGP"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        let currentRoom = null;
+        let currentUser = {
+            id: 'user_' + Math.random().toString(36).substr(2, 9),
+            name: 'Anonymous',
+            isCreator: false,
+            joinedAt: Date.now(),
+            isTyping: false,
+            permissions: { canEdit: true, canSave: true }
+        };
+        let typingTimeout = null;
+        let roomSettings = {
+            readOnly: false,
+            voiceEnabled: false,
+            maxUsers: 10
+        };
+        let isUpdatingFromFirebase = false;
+        let roomRef = null;
+        
+        // Collaboration Dialog Management
+        document.getElementById('collaborate').addEventListener('click', () => {
+            document.getElementById('collab-overlay').style.display = 'block';
+            updateCollabDialog();
+        });
+        
+        document.getElementById('collab-close').addEventListener('click', () => {
+            document.getElementById('collab-overlay').style.display = 'none';
+        });
+        
+        document.getElementById('collab-overlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                document.getElementById('collab-overlay').style.display = 'none';
+            }
+        });
+        
+        // Room Management
+        document.getElementById('create-room').addEventListener('click', createRoom);
+        document.getElementById('join-room').addEventListener('click', joinRoom);
+        document.getElementById('leave-room').addEventListener('click', leaveRoom);
+        document.getElementById('copy-room-link').addEventListener('click', copyRoomLink);
+        document.getElementById('user-name').addEventListener('input', updateUserName);
+        document.getElementById('toggle-readonly').addEventListener('click', toggleReadOnly);
+        document.getElementById('toggle-voice').addEventListener('click', toggleVoice);
+        document.getElementById('save-snapshot').addEventListener('click', saveSnapshot);
+        document.getElementById('version-history').addEventListener('click', showVersionHistory);
+        
+        function createRoom() {
+            const roomName = document.getElementById('room-name').value.trim() || generateRoomId();
+            currentUser.name = document.getElementById('user-name').value.trim() || 'Anonymous';
+            currentUser.isCreator = true;
+            joinCollaborationRoom(roomName);
+        }
+        
+        function joinRoom() {
+            const roomName = document.getElementById('room-name').value.trim();
+            if (!roomName) {
+                alert('Please enter a room name');
+                return;
+            }
+            currentUser.name = document.getElementById('user-name').value.trim() || 'Anonymous';
+            currentUser.isCreator = false;
+            joinCollaborationRoom(roomName);
+        }
+        
+        function leaveRoom() {
+            if (roomRef && currentRoom) {
+                roomRef.child('users').child(currentUser.id).remove();
+                if (currentUser.isCreator) {
+                    roomRef.remove();
+                }
+                roomRef = null;
+                currentRoom = null;
+                updateCollabDialog();
+                // Redirect to clean URL
+                window.history.pushState({}, '', window.location.pathname);
+            }
+        }
+        
+        function joinCollaborationRoom(roomId) {
+            currentRoom = roomId;
+            roomRef = database.ref(`rooms/${roomId}`);
+            
+            // Check room capacity
+            roomRef.child('users').once('value', (snapshot) => {
+                const users = snapshot.val() || {};
+                if (Object.keys(users).length >= roomSettings.maxUsers && !currentUser.isCreator) {
+                    alert('Room is full!');
+                    return;
+                }
+                
+                // Add user to room
+                roomRef.child('users').child(currentUser.id).set({
+                    name: currentUser.name,
+                    isCreator: currentUser.isCreator,
+                    joinedAt: firebase.database.ServerValue.TIMESTAMP,
+                    lastActive: firebase.database.ServerValue.TIMESTAMP,
+                    isTyping: false,
+                    permissions: currentUser.permissions
+                });
+                
+                // Set up listeners
+                setupCollaborationListeners();
+                
+                // Update URL
+                window.history.pushState({}, '', `?room=${roomId}`);
+                document.title = `CodeZap - Room: ${roomId}`;
+                
+                updateCollabDialog();
+                addActivityLog(`${currentUser.name} joined the room`);
+            });
+        }
+        
+        function setupCollaborationListeners() {
+            // Content sync
+            roomRef.child('content/html').on('value', (snapshot) => {
+                const content = snapshot.val() || '';
+                updateEditorFromFirebase(htmlEditor, content);
+            });
+            
+            roomRef.child('content/css').on('value', (snapshot) => {
+                const content = snapshot.val() || '';
+                updateEditorFromFirebase(cssEditor, content);
+            });
+            
+            roomRef.child('content/js').on('value', (snapshot) => {
+                const content = snapshot.val() || '';
+                updateEditorFromFirebase(jsEditor, content);
+            });
+            
+            // Users tracking
+            roomRef.child('users').on('value', (snapshot) => {
+                updateUsersList(snapshot.val() || {});
+            });
+            
+            // Activity logs
+            roomRef.child('logs').limitToLast(10).on('value', (snapshot) => {
+                updateActivityLogs(snapshot.val() || {});
+            });
+            
+            // Room settings
+            roomRef.child('settings').on('value', (snapshot) => {
+                roomSettings = { ...roomSettings, ...(snapshot.val() || {}) };
+                updateRoomFeatures();
+            });
+            
+            // Typing indicators
+            roomRef.child('users').on('value', (snapshot) => {
+                const users = snapshot.val() || {};
+                updateTypingIndicator(users);
+                updateUsersList(users);
+            });
+        }
+        
+        function syncToFirebase(editor, type) {
+            if (isUpdatingFromFirebase || !roomRef) return;
+            
+            const content = editor.getValue();
+            roomRef.child('content').child(type).set(content);
+            roomRef.child('users').child(currentUser.id).child('lastActive').set(firebase.database.ServerValue.TIMESTAMP);
+            
+            addActivityLog(`${currentUser.name} edited ${type.toUpperCase()}`);
+        }
+        
+        function updateEditorFromFirebase(editor, newContent) {
+            if (editor.getValue() === newContent) return;
+            
+            isUpdatingFromFirebase = true;
+            const cursor = editor.getCursor();
+            const scrollInfo = editor.getScrollInfo();
+            
+            editor.setValue(newContent);
+            editor.setCursor(cursor);
+            editor.scrollTo(scrollInfo.left, scrollInfo.top);
+            
+            isUpdatingFromFirebase = false;
+            
+            if (autoRun) {
+                updatePreview();
+                updateMobilePreview();
+            }
+        }
+        
+        function updateCollabDialog() {
+            const roomInfo = document.getElementById('room-info');
+            const usersSection = document.getElementById('users-section');
+            const logsSection = document.getElementById('logs-section');
+            const leaveBtn = document.getElementById('leave-room');
+            
+            if (currentRoom) {
+                roomInfo.style.display = 'block';
+                usersSection.style.display = 'block';
+                logsSection.style.display = 'block';
+                leaveBtn.style.display = 'inline-block';
+                document.getElementById('room-status').textContent = `Connected to "${currentRoom}"`;
+                updateRoomFeatures();
+            } else {
+                roomInfo.style.display = 'none';
+                usersSection.style.display = 'none';
+                logsSection.style.display = 'none';
+                leaveBtn.style.display = 'none';
+                document.getElementById('room-features').style.display = 'none';
+            }
+        }
+        
+        function updateUsersList(users) {
+            const usersList = document.getElementById('users-list');
+            const userCount = document.getElementById('user-count');
+            
+            usersList.innerHTML = '';
+            const userArray = Object.entries(users);
+            userCount.textContent = userArray.length;
+            
+            userArray.forEach(([id, user]) => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                
+                const isCurrentUser = id === currentUser.id;
+                const canManage = currentUser.isCreator && !isCurrentUser;
+                
+                userItem.innerHTML = `
+                    <div>
+                        <span class="user-name">${user.name}${isCurrentUser ? ' (You)' : ''}</span>
+                        <span class="user-role">${user.isCreator ? 'Creator' : 'Member'}</span>
+                        ${user.isTyping ? '<span class="user-status status-typing">typing...</span>' : '<span class="user-status status-online">online</span>'}
+                    </div>
+                    ${canManage ? `
+                        <div class="user-actions">
+                            <button class="user-action-btn kick-btn" onclick="kickUser('${id}', '${user.name}')">Kick</button>
+                            ${!user.isCreator ? `<button class="user-action-btn promote-btn" onclick="promoteUser('${id}', '${user.name}')">Promote</button>` : ''}
+                        </div>
+                    ` : ''}
+                `;
+                usersList.appendChild(userItem);
+            });
+        }
+        
+        function updateActivityLogs(logs) {
+            const activityLogs = document.getElementById('activity-logs');
+            activityLogs.innerHTML = '';
+            
+            Object.entries(logs).forEach(([id, log]) => {
+                const logItem = document.createElement('div');
+                logItem.className = 'log-item';
+                logItem.innerHTML = `
+                    <span class="log-time">${new Date(log.timestamp).toLocaleTimeString()}</span> - 
+                    <span class="log-user">${log.message}</span>
+                `;
+                activityLogs.appendChild(logItem);
+            });
+            
+            activityLogs.scrollTop = activityLogs.scrollHeight;
+        }
+        
+        function addActivityLog(message) {
+            if (!roomRef) return;
+            
+            roomRef.child('logs').push({
+                message: message,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                userId: currentUser.id
+            });
+        }
+        
+        function copyRoomLink() {
+            const roomLink = `${window.location.origin}${window.location.pathname}?room=${currentRoom}`;
+            navigator.clipboard.writeText(roomLink).then(() => {
+                alert('Room link copied to clipboard!');
+            }).catch(() => {
+                prompt('Copy this room link:', roomLink);
+            });
+        }
+        
+        function generateRoomId() {
+            return 'room_' + Math.random().toString(36).substr(2, 8);
+        }
+        
+        function updateUserName() {
+            const newName = document.getElementById('user-name').value.trim() || 'Anonymous';
+            currentUser.name = newName;
+            if (roomRef) {
+                roomRef.child('users').child(currentUser.id).child('name').set(newName);
+                addActivityLog(`User renamed to ${newName}`);
+            }
+        }
+        
+        function kickUser(userId, userName) {
+            if (confirm(`Kick ${userName} from the room?`)) {
+                roomRef.child('users').child(userId).remove();
+                addActivityLog(`${userName} was kicked from the room`);
+            }
+        }
+        
+        function promoteUser(userId, userName) {
+            if (confirm(`Promote ${userName} to creator?`)) {
+                roomRef.child('users').child(userId).child('isCreator').set(true);
+                roomRef.child('users').child(currentUser.id).child('isCreator').set(false);
+                currentUser.isCreator = false;
+                addActivityLog(`${userName} was promoted to creator`);
+            }
+        }
+        
+        function toggleReadOnly() {
+            if (!currentUser.isCreator) return;
+            roomSettings.readOnly = !roomSettings.readOnly;
+            roomRef.child('settings').child('readOnly').set(roomSettings.readOnly);
+            addActivityLog(`Read-only mode ${roomSettings.readOnly ? 'enabled' : 'disabled'}`);
+        }
+        
+        function toggleVoice() {
+            roomSettings.voiceEnabled = !roomSettings.voiceEnabled;
+            document.getElementById('toggle-voice').classList.toggle('active', roomSettings.voiceEnabled);
+            addActivityLog(`Voice chat ${roomSettings.voiceEnabled ? 'enabled' : 'disabled'}`);
+        }
+        
+        function saveSnapshot() {
+            const snapshot = {
+                html: htmlEditor.getValue(),
+                css: cssEditor.getValue(),
+                js: jsEditor.getValue(),
+                timestamp: Date.now(),
+                author: currentUser.name
+            };
+            roomRef.child('snapshots').push(snapshot);
+            addActivityLog(`${currentUser.name} saved a snapshot`);
+            alert('Snapshot saved!');
+        }
+        
+        function showVersionHistory() {
+            roomRef.child('snapshots').limitToLast(5).once('value', (snapshot) => {
+                const snapshots = snapshot.val() || {};
+                const history = Object.entries(snapshots).map(([id, snap]) => 
+                    `${new Date(snap.timestamp).toLocaleString()} - ${snap.author}`
+                ).join('\n');
+                alert('Recent Snapshots:\n' + (history || 'No snapshots found'));
+            });
+        }
+        
+        function updateRoomFeatures() {
+            document.getElementById('room-features').style.display = currentUser.isCreator ? 'flex' : 'none';
+            document.getElementById('toggle-readonly').classList.toggle('active', roomSettings.readOnly);
+            
+            // Disable editors if read-only and not creator
+            const isReadOnly = roomSettings.readOnly && !currentUser.isCreator;
+            htmlEditor.setOption('readOnly', isReadOnly);
+            cssEditor.setOption('readOnly', isReadOnly);
+            jsEditor.setOption('readOnly', isReadOnly);
+        }
+        
+        function updateTypingIndicator(users) {
+            const typingUsers = Object.values(users).filter(user => 
+                user.isTyping && user.name !== currentUser.name
+            ).map(user => user.name);
+            
+            const indicator = document.getElementById('typing-indicator');
+            if (typingUsers.length > 0) {
+                indicator.textContent = `${typingUsers.join(', ')} typing...`;
+            } else {
+                indicator.textContent = '';
+            }
+        }
+        
+        function setTypingStatus(isTyping) {
+            if (roomRef && currentUser.isTyping !== isTyping) {
+                currentUser.isTyping = isTyping;
+                roomRef.child('users').child(currentUser.id).child('isTyping').set(isTyping);
+            }
+        }
+        
+        // Auto-join room from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomFromUrl = urlParams.get('room');
+        if (roomFromUrl) {
+            // Prompt for name when joining via URL
+            const userName = prompt('Enter your name for collaboration:') || 'Anonymous';
+            currentUser.name = userName;
+            document.getElementById('user-name').value = userName;
+            currentUser.isCreator = false;
+            joinCollaborationRoom(roomFromUrl);
+        }
+        
+        // Add Firebase sync to editor change events with typing indicators
+        htmlEditor.on('change', () => {
+            syncToFirebase(htmlEditor, 'html');
+            setTypingStatus(true);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => setTypingStatus(false), 1000);
+            if (autoRun && !isUpdatingFromFirebase) {
+                updatePreview();
+                updateMobilePreview();
+            }
+        });
+        
+        cssEditor.on('change', () => {
+            syncToFirebase(cssEditor, 'css');
+            setTypingStatus(true);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => setTypingStatus(false), 1000);
+            if (autoRun && !isUpdatingFromFirebase) {
+                updatePreview();
+                updateMobilePreview();
+            }
+        });
+        
+        jsEditor.on('change', () => {
+            syncToFirebase(jsEditor, 'js');
+            setTypingStatus(true);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => setTypingStatus(false), 1000);
+            if (autoRun && !isUpdatingFromFirebase) {
+                updatePreview();
+                updateMobilePreview();
+            }
+        });
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (roomRef && currentRoom) {
+                addActivityLog(`${currentUser.name} left the room`);
+                roomRef.child('users').child(currentUser.id).remove();
+                if (currentUser.isCreator) {
+                    // Check if there are other users to promote
+                    roomRef.child('users').once('value', (snapshot) => {
+                        const users = snapshot.val() || {};
+                        const otherUsers = Object.entries(users).filter(([id]) => id !== currentUser.id);
+                        if (otherUsers.length > 0) {
+                            // Promote first other user to creator
+                            const [newCreatorId] = otherUsers[0];
+                            roomRef.child('users').child(newCreatorId).child('isCreator').set(true);
+                        } else {
+                            // No other users, delete room
+                            roomRef.remove();
+                        }
+                    });
+                }
+            }
+        });
+        
+        // Make functions global for onclick handlers
+        window.kickUser = kickUser;
+        window.promoteUser = promoteUser;
 
 
 
