@@ -467,6 +467,7 @@
                     <button class="button outline" id="save">💾 Save</button>
                     <button class="button outline" id="load">📁 Load</button>
                     <button class="button ghost" id="download">⬇ Export</button>
+                    <button class="button ghost" id="share">🔗 Share</button>
                     <button class="button ghost" onclick="window.open('python.html', '_blank')">🐍 Python</button>
                     <button class="button ghost" onclick="window.open('sql.html', '_blank')">🗃 SQL</button>
                 </div>
@@ -659,11 +660,13 @@
             });
         });
 
-        // Initialize with sample code
-        htmlEditor.setValue('<h1>Hello, CodeZap!</h1>\n<p>Start coding here...</p>');
-        cssEditor.setValue('body {\n    font-family: Arial, sans-serif;\n    text-align: center;\n    padding: 20px;\n}');
-        jsEditor.setValue('console.log("Welcome to CodeZap!");');
-        updatePreview();
+        // Initialize with sample code (only if no URL params)
+        if (!window.location.search) {
+            htmlEditor.setValue('<h1>Hello, CodeZap!</h1>\n<p>Start coding here...</p>');
+            cssEditor.setValue('body {\n    font-family: Arial, sans-serif;\n    text-align: center;\n    padding: 20px;\n}');
+            jsEditor.setValue('console.log("Welcome to CodeZap!");');
+            updatePreview();
+        }
         // Fullscreen functionality
         let isFullscreen = false;
         const fullscreenBtn = document.getElementById('fullscreen');
@@ -689,6 +692,49 @@
                 exitFullscreen();
             }
         });
+
+        // URL sharing functionality
+        function loadFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const html = params.get('html');
+            const css = params.get('css');
+            const js = params.get('js');
+            
+            if (html || css || js) {
+                htmlEditor.setValue(html ? decodeURIComponent(html) : '');
+                cssEditor.setValue(css ? decodeURIComponent(css) : '');
+                jsEditor.setValue(js ? decodeURIComponent(js) : '');
+                updatePreview();
+                updateMobilePreview();
+            }
+        }
+
+        function generateShareURL() {
+            const html = encodeURIComponent(htmlEditor.getValue());
+            const css = encodeURIComponent(cssEditor.getValue());
+            const js = encodeURIComponent(jsEditor.getValue());
+            
+            const baseURL = window.location.origin + window.location.pathname;
+            const params = new URLSearchParams();
+            
+            if (htmlEditor.getValue()) params.set('html', html);
+            if (cssEditor.getValue()) params.set('css', css);
+            if (jsEditor.getValue()) params.set('js', js);
+            
+            return `${baseURL}?${params.toString()}`;
+        }
+
+        document.getElementById('share').addEventListener('click', () => {
+            const shareURL = generateShareURL();
+            navigator.clipboard.writeText(shareURL).then(() => {
+                alert('Share link copied to clipboard!');
+            }).catch(() => {
+                prompt('Copy this link to share:', shareURL);
+            });
+        });
+
+        // Load code from URL on page load
+        window.addEventListener('load', loadFromURL);
 
 
 
