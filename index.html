@@ -28,6 +28,7 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23059669;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='40' fill='url(%23grad)'/%3E%3Cpath d='M40 50h100v12H40zm0 24h80v12H40zm0 24h90v12H40zm0 24h70v12H40z' fill='white' opacity='0.9'/%3E%3Cpath d='M120 90l20 15-20 15v-10h-15v-10h15v-10z' fill='%23fbbf24'/%3E%3C/svg%3E">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
@@ -1366,9 +1367,54 @@
         });
 
         // URL sharing functionality with compression
+        function compressData(data) {
+            try {
+                const jsonStr = JSON.stringify(data);
+                
+                // Try pako compression first (gzip + base64)
+                try {
+                    const gzipped = pako.gzip(jsonStr);
+                    const base64 = btoa(String.fromCharCode.apply(null, gzipped));
+                    return { data: base64, method: 'pako' };
+                } catch (pakoError) {
+                    console.warn('Pako compression failed, falling back to LZ-string:', pakoError);
+                }
+                
+                // Fallback to LZ-string
+                const lzCompressed = LZString.compressToEncodedURIComponent(jsonStr);
+                return { data: lzCompressed, method: 'lz' };
+            } catch (e) {
+                console.error('Compression failed:', e);
+                return { data: '', method: 'none' };
+            }
+        }
+        
+        function decompressData(compressed, method) {
+            try {
+                let decompressed;
+                
+                if (method === 'pako') {
+                    const binaryString = atob(compressed);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    decompressed = pako.ungzip(bytes, { to: 'string' });
+                } else {
+                    decompressed = LZString.decompressFromEncodedURIComponent(compressed);
+                }
+                
+                return JSON.parse(decompressed);
+            } catch (e) {
+                console.error('Decompression failed:', e);
+                return null;
+            }
+        }
+        
         function loadFromURL() {
             const params = new URLSearchParams(window.location.search);
             const compressed = params.get('c');
+            const method = params.get('m') || 'lz'; // Default to lz for backward compatibility
             const embedMode = params.get('embed');
             
             if (embedMode) {
@@ -1382,9 +1428,8 @@
             }
             
             if (compressed) {
-                try {
-                    const decompressed = LZString.decompressFromEncodedURIComponent(compressed);
-                    const data = JSON.parse(decompressed);
+                const data = decompressData(compressed, method);
+                if (data) {
                     htmlEditor.setValue(data.h || '');
                     cssEditor.setValue(data.c || '');
                     jsEditor.setValue(data.j || '');
@@ -1393,8 +1438,6 @@
                     setTimeout(() => {
                         updatePreview();
                     }, 100);
-                } catch (e) {
-                    console.error('Failed to load shared code:', e);
                 }
             }
         }
@@ -1406,10 +1449,10 @@
                 j: jsEditor.getValue()
             };
             
-            const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(data));
+            const compressed = compressData(data);
             const baseURL = window.location.origin + window.location.pathname;
             
-            return `${baseURL}?c=${compressed}`;
+            return `${baseURL}?c=${compressed.data}&m=${compressed.method}`;
         }
         
         function generateEmbedURL(mode = 'full') {
@@ -1419,10 +1462,10 @@
                 j: jsEditor.getValue()
             };
             
-            const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(data));
+            const compressed = compressData(data);
             const baseURL = window.location.origin + window.location.pathname;
             
-            return `${baseURL}?c=${compressed}&embed=${mode}`;
+            return `${baseURL}?c=${compressed.data}&m=${compressed.method}&embed=${mode}`;
         }
 
         document.getElementById('share').addEventListener('click', () => {
