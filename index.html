@@ -26,7 +26,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/fold/foldgutter.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23059669;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='40' fill='url(%23grad)'/%3E%3Cpath d='M40 50h100v12H40zm0 24h80v12H40zm0 24h90v12H40zm0 24h70v12H40z' fill='white' opacity='0.9'/%3E%3Cpath d='M120 90l20 15-20 15v-10h-15v-10h15v-10z' fill='%23fbbf24'/%3E%3C/svg%3E">
-    <script src="https://cdn.jsdelivr.net/gh/hacktek90/cursor@main/cursor-plugin.js" defer></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
     <style>
         * {
@@ -430,7 +430,7 @@
         
         .embed-mode .preview-section iframe {
             border-radius: 0;
-            height: 300px;
+            height: 100vh;
         }
         
         .embed-mode .controls {
@@ -448,10 +448,22 @@
         
         .embed-preview-only .preview-section {
             padding: 0;
+            border-radius: 0;
+            box-shadow: none;
         }
         
         .embed-preview-only .preview-section iframe {
             height: 100vh;
+            width: 100vw;
+            border-radius: 0;
+        }
+        
+        .embed-preview-only .controls {
+            display: none;
+        }
+        
+        .embed-preview-only body::before {
+            display: none;
         }
         
         /* Embed dropdown menu */
@@ -817,6 +829,9 @@
                 document.body.style.padding = '0';
                 if (embedMode === 'preview') {
                     document.body.classList.add('embed-mode', 'embed-preview-only');
+                    // Hide background pattern for preview-only mode
+                    const bgElement = document.querySelector('body::before');
+                    if (bgElement) bgElement.style.display = 'none';
                 } else {
                     document.body.classList.add('embed-mode');
                 }
@@ -829,8 +844,12 @@
                     htmlEditor.setValue(data.h || '');
                     cssEditor.setValue(data.c || '');
                     jsEditor.setValue(data.j || '');
-                    updatePreview();
-                    updateMobilePreview();
+                    
+                    // Force update preview for embed modes
+                    setTimeout(() => {
+                        updatePreview();
+                        updateMobilePreview();
+                    }, 100);
                 } catch (e) {
                     console.error('Failed to load shared code:', e);
                 }
