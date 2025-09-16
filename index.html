@@ -1601,11 +1601,7 @@
                     document.body.classList.add('preview-embed-mode');
                     enterFullscreen();
                     
-                    if (embedMode === 'cloud') {
-                        setTimeout(() => {
-                            addCloudDeleteButton();
-                        }, 500);
-                    }
+
                 } else {
                     document.body.classList.add('embed-mode');
                 }
