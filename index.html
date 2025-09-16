@@ -422,6 +422,122 @@
             to { box-shadow: 0 6px 25px rgba(255, 215, 0, 0.8); }
         }
         
+        .cloud-manager-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cloud-manager-panel {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+        }
+        
+        .cloud-manager-header {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a1a;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .cloud-manager-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .cloud-manager-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .cloud-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        
+        .cloud-item:hover {
+            border-color: #6366f1;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cloud-item-info {
+            flex: 1;
+        }
+        
+        .cloud-item-id {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .cloud-item-date {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        
+        .cloud-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .cloud-action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn {
+            background: #10b981;
+            color: white;
+        }
+        
+        .copy-btn:hover {
+            background: #059669;
+            transform: scale(1.05);
+        }
+        
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+        
 
 
         /* Embed mode styles */
@@ -1152,6 +1268,7 @@
                     <button class="button ghost" id="share">🔗 Share</button>
                     <button class="button ghost" id="collaborate">🤝 Collaborate</button>
                     <button class="button ghost" id="view-logs" style="display: none;">📈 View All Logs</button>
+                    <button class="button ghost" id="cloud-manager" style="display: none;">☁️ Cloud Manager</button>
 
                     <div class="embed-dropdown">
                         <button class="button ghost" id="embed">💼 Embed</button>
@@ -1177,6 +1294,19 @@
             <div id="error"></div>
         </div>
         <button class="fullscreen-exit" id="fullscreen-exit">×</button>
+    </div>
+    
+    <!-- Cloud Manager -->
+    <div class="cloud-manager-overlay" id="cloud-manager-overlay">
+        <div class="cloud-manager-panel">
+            <div class="cloud-manager-header">
+                <div class="cloud-manager-title">☁️ Cloud Embed Manager</div>
+                <button style="background: none; border: none; font-size: 20px; cursor: pointer;" id="cloud-manager-close">×</button>
+            </div>
+            <div class="cloud-manager-body" id="cloud-manager-body">
+                <div style="text-align: center; color: #64748b; padding: 40px;">Loading cloud embeds...</div>
+            </div>
+        </div>
     </div>
     
     <!-- Kick Notification -->
@@ -1582,6 +1712,7 @@
             const params = new URLSearchParams(window.location.search);
             if (params.get('admin') === 'elite') {
                 document.querySelector('[data-mode="cloud"]').style.display = 'block';
+                document.getElementById('cloud-manager').style.display = 'inline-block';
                 addAdminIndicator();
             }
         });
@@ -2307,10 +2438,87 @@
             document.body.appendChild(indicator);
         }
         
+        // Cloud Manager System
+        document.getElementById('cloud-manager').addEventListener('click', openCloudManager);
+        document.getElementById('cloud-manager-close').addEventListener('click', closeCloudManager);
+        
+        function openCloudManager() {
+            document.getElementById('cloud-manager-overlay').style.display = 'flex';
+            loadCloudEmbeds();
+        }
+        
+        function closeCloudManager() {
+            document.getElementById('cloud-manager-overlay').style.display = 'none';
+        }
+        
+        function loadCloudEmbeds() {
+            const body = document.getElementById('cloud-manager-body');
+            body.innerHTML = '<div style="text-align: center; color: #64748b; padding: 40px;">Loading cloud embeds...</div>';
+            
+            database.ref('coderooms').once('value').then(snapshot => {
+                const embeds = snapshot.val() || {};
+                const embedArray = Object.entries(embeds);
+                
+                if (embedArray.length === 0) {
+                    body.innerHTML = '<div style="text-align: center; color: #64748b; padding: 40px;">No cloud embeds found</div>';
+                    return;
+                }
+                
+                body.innerHTML = '';
+                embedArray.forEach(([id, data]) => {
+                    const item = document.createElement('div');
+                    item.className = 'cloud-item';
+                    
+                    const date = data.createdAt ? new Date(data.createdAt).toLocaleString() : 'Unknown';
+                    
+                    item.innerHTML = `
+                        <div class="cloud-item-info">
+                            <div class="cloud-item-id">${id}</div>
+                            <div class="cloud-item-date">Created: ${date}</div>
+                        </div>
+                        <div class="cloud-item-actions">
+                            <button class="cloud-action-btn copy-btn" onclick="copyIframe('${id}')">📋 Copy Iframe</button>
+                            <button class="cloud-action-btn delete-btn" onclick="deleteEmbed('${id}')">🗑️ Delete</button>
+                        </div>
+                    `;
+                    
+                    body.appendChild(item);
+                });
+            }).catch(error => {
+                console.error('Failed to load cloud embeds:', error);
+                body.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 40px;">Failed to load cloud embeds</div>';
+            });
+        }
+        
+        function copyIframe(embedId) {
+            const embedURL = `${window.location.origin}${window.location.pathname}?cr=${embedId}&embed=cloud`;
+            const embedCode = `<iframe src="${embedURL}" width="100%" height="100%" frameborder="0"></iframe>`;
+            
+            navigator.clipboard.writeText(embedCode).then(() => {
+                alert('Iframe code copied to clipboard!');
+            }).catch(() => {
+                prompt('Copy this iframe code:', embedCode);
+            });
+        }
+        
+        function deleteEmbed(embedId) {
+            if (confirm(`Delete cloud embed ${embedId}?`)) {
+                database.ref(`coderooms/${embedId}`).remove().then(() => {
+                    alert('Cloud embed deleted successfully!');
+                    loadCloudEmbeds();
+                }).catch(error => {
+                    console.error('Failed to delete embed:', error);
+                    alert('Failed to delete embed.');
+                });
+            }
+        }
+        
         // Make functions global for onclick handlers
         window.kickUser = kickUser;
         window.promoteUser = promoteUser;
         window.deleteCloudRoom = deleteCloudRoom;
+        window.copyIframe = copyIframe;
+        window.deleteEmbed = deleteEmbed;
 
 
 
