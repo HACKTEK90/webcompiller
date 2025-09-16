@@ -379,6 +379,49 @@
             display: none;
         }
         
+        .cloud-delete-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 2001;
+            transition: all 0.3s ease;
+        }
+        
+        .cloud-delete-btn:hover {
+            background: rgba(220, 38, 38, 0.9);
+            transform: scale(1.05);
+        }
+        
+        .admin-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #1a1a1a;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            z-index: 9999;
+            animation: adminGlow 2s ease-in-out infinite alternate;
+            border: 2px solid #ffd700;
+        }
+        
+        @keyframes adminGlow {
+            from { box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
+            to { box-shadow: 0 6px 25px rgba(255, 215, 0, 0.8); }
+        }
+        
 
 
         /* Embed mode styles */
@@ -1121,6 +1164,10 @@
                                 <div class="embed-option-title">👁️ Preview Only</div>
                                 <div class="embed-option-desc">Auto fullscreen preview with close button</div>
                             </div>
+                            <div class="embed-option" data-mode="cloud" style="display: none;">
+                                <div class="embed-option-title">☁️ Cloud Embed</div>
+                                <div class="embed-option-desc">Preview stored in cloud with delete option</div>
+                            </div>
                         </div>
                     </div>
 
@@ -1414,27 +1461,35 @@
         function loadFromURL() {
             const params = new URLSearchParams(window.location.search);
             const compressed = params.get('c');
-            const method = params.get('m') || 'lz'; // Default to lz for backward compatibility
+            const method = params.get('m') || 'lz';
             const embedMode = params.get('embed');
+            const codeRoomId = params.get('cr');
             
             if (embedMode) {
                 document.body.style.padding = '0';
-                if (embedMode === 'preview') {
+                if (embedMode === 'preview' || embedMode === 'cloud') {
                     document.body.classList.add('preview-embed-mode');
                     enterFullscreen();
+                    
+                    if (embedMode === 'cloud') {
+                        setTimeout(() => {
+                            addCloudDeleteButton();
+                        }, 500);
+                    }
                 } else {
                     document.body.classList.add('embed-mode');
                 }
             }
             
-            if (compressed) {
+            if (codeRoomId) {
+                loadFromCloudRoom(codeRoomId);
+            } else if (compressed) {
                 const data = decompressData(compressed, method);
                 if (data) {
                     htmlEditor.setValue(data.h || '');
                     cssEditor.setValue(data.c || '');
                     jsEditor.setValue(data.j || '');
                     
-                    // Force update preview for embed modes
                     setTimeout(() => {
                         updatePreview();
                     }, 100);
@@ -1500,15 +1555,20 @@
         document.querySelectorAll('.embed-option').forEach(option => {
             option.addEventListener('click', () => {
                 const mode = option.dataset.mode;
-                const embedURL = generateEmbedURL(mode);
-                const dimensions = mode === 'preview' ? 'width="100%" height="100%"' : 'width="800" height="500"';
-                const embedCode = `<iframe src="${embedURL}" ${dimensions} frameborder="0"></iframe>`;
                 
-                navigator.clipboard.writeText(embedCode).then(() => {
-                    alert(`${mode === 'preview' ? 'Preview embed' : 'Full compiler embed'} code copied!`);
-                }).catch(() => {
-                    prompt('Copy this embed code:', embedCode);
-                });
+                if (mode === 'cloud') {
+                    generateCloudEmbed();
+                } else {
+                    const embedURL = generateEmbedURL(mode);
+                    const dimensions = mode === 'preview' ? 'width="100%" height="100%"' : 'width="800" height="500"';
+                    const embedCode = `<iframe src="${embedURL}" ${dimensions} frameborder="0"></iframe>`;
+                    
+                    navigator.clipboard.writeText(embedCode).then(() => {
+                        alert(`${mode === 'preview' ? 'Preview embed' : 'Full compiler embed'} code copied!`);
+                    }).catch(() => {
+                        prompt('Copy this embed code:', embedCode);
+                    });
+                }
                 
                 document.getElementById('embed-menu').classList.remove('show');
             });
@@ -1518,7 +1578,12 @@
         window.addEventListener('load', () => {
             loadFromURL();
             
-
+            // Show cloud embed option and admin indicator for admin
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('admin') === 'elite') {
+                document.querySelector('[data-mode="cloud"]').style.display = 'block';
+                addAdminIndicator();
+            }
         });
 
         // Enhanced Firebase Collaboration System
@@ -2166,9 +2231,86 @@
             });
         }
         
+        // Cloud embed functions (owner only)
+        function generateCloudEmbed() {
+            const codeRoomId = 'cr_' + Math.random().toString(36).substr(2, 12);
+            const data = {
+                html: htmlEditor.getValue(),
+                css: cssEditor.getValue(),
+                js: jsEditor.getValue(),
+                createdAt: firebase.database.ServerValue.TIMESTAMP,
+                owner: currentUser.id
+            };
+            
+            database.ref(`coderooms/${codeRoomId}`).set(data).then(() => {
+                const embedURL = `${window.location.origin}${window.location.pathname}?cr=${codeRoomId}&embed=cloud`;
+                const embedCode = `<iframe src="${embedURL}" width="100%" height="100%" frameborder="0"></iframe>`;
+                
+                navigator.clipboard.writeText(embedCode).then(() => {
+                    alert('Cloud embed code copied! Code stored in cloud.');
+                }).catch(() => {
+                    prompt('Copy this cloud embed code:', embedCode);
+                });
+            }).catch(error => {
+                console.error('Failed to create cloud embed:', error);
+                alert('Failed to create cloud embed. Please try again.');
+            });
+        }
+        
+        function loadFromCloudRoom(codeRoomId) {
+            database.ref(`coderooms/${codeRoomId}`).once('value').then(snapshot => {
+                const data = snapshot.val();
+                if (data) {
+                    htmlEditor.setValue(data.html || '');
+                    cssEditor.setValue(data.css || '');
+                    jsEditor.setValue(data.js || '');
+                    
+                    setTimeout(() => {
+                        updatePreview();
+                    }, 100);
+                } else {
+                    console.error('Code room not found');
+                }
+            }).catch(error => {
+                console.error('Failed to load cloud code:', error);
+            });
+        }
+        
+        function addCloudDeleteButton() {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'cloud-delete-btn';
+            deleteBtn.textContent = '🗑️ Delete';
+            deleteBtn.onclick = deleteCloudRoom;
+            document.body.appendChild(deleteBtn);
+        }
+        
+        function deleteCloudRoom() {
+            const params = new URLSearchParams(window.location.search);
+            const codeRoomId = params.get('cr');
+            
+            if (codeRoomId && confirm('Delete this cloud embed permanently?')) {
+                database.ref(`coderooms/${codeRoomId}`).remove().then(() => {
+                    alert('Cloud embed deleted successfully!');
+                    window.close();
+                }).catch(error => {
+                    console.error('Failed to delete cloud embed:', error);
+                    alert('Failed to delete cloud embed.');
+                });
+            }
+        }
+        
+        // Admin indicator
+        function addAdminIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'admin-indicator';
+            indicator.textContent = '👑 ADMIN MODE';
+            document.body.appendChild(indicator);
+        }
+        
         // Make functions global for onclick handlers
         window.kickUser = kickUser;
         window.promoteUser = promoteUser;
+        window.deleteCloudRoom = deleteCloudRoom;
 
 
 
